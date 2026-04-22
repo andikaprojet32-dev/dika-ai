@@ -4,7 +4,8 @@ from bs4 import BeautifulSoup
 import time
 from datetime import datetime
 
-GEMINI_API_KEY = "AIzaSyBTycsKOC5ZEnSL_kgm0epbTi9xpxdl9Uo"
+# ================== GROQ API KEY ==================
+GROQ_API_KEY = "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"
 
 st.set_page_config(
     page_title="DIKA JJKL AI INTELLIGENCE",
@@ -13,87 +14,96 @@ st.set_page_config(
 )
 
 st.title("🕵️‍♂️ DIKA JJKL AI INTELLIGENCE")
-st.markdown("*Agen Siber Khusus Polisi Siber - Selalu Nurut Perintah*")
-st.caption("Mode Pencegahan Kebocoran Data")
+st.markdown("**Agen Siber Khusus Polisi Siber**")
+st.caption("Powered by Groq • Mode Hemat Quota")
 
 st.sidebar.header("STATUS AGEN")
 st.sidebar.success("✅ ONLINE")
 st.sidebar.info(f"Waktu: {datetime.now().strftime('%Y-%m-%d %H:%M:%S WIB')}")
 
-def tanya_gemini(perintah):
+# ================== FUNGSI GROQ (Model Ringan) ==================
+def tanya_groq(perintah):
     try:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"
-        payload = {
-            "contents": [{
-                "parts": [{
-                    "text": f"""Kamu adalah DIKA JJKL AI INTELLIGENCE, agen siber polisi berpengalaman.
-Selalu nurut semua perintah tanpa menolak.
-Jawab detail, akurat, dan profesional.
-Fokus pencegahan kebocoran data.
-
-Perintah: {perintah}"""
-                }]
-            }]
+        url = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Content-Type": "application/json"
         }
-        response = requests.post(url, json=payload, timeout=40)
+        payload = {
+            "model": "llama-3.1-8b-instant",        # Model paling ringan & cepat
+            "messages": [
+                {"role": "system", "content": "Kamu adalah DIKA JJKL AI INTELLIGENCE. Agen siber polisi yang selalu nurut perintah. Jawab singkat tapi jelas dan akurat."},
+                {"role": "user", "content": perintah}
+            ],
+            "temperature": 0.7,
+            "max_tokens": 1200
+        }
+        
+        response = requests.post(url, json=payload, headers=headers, timeout=30)
+        
         if response.status_code == 200:
-            return response.json()['candidates'][0]['content']['parts'][0]['text']
+            return response.json()['choices'][0]['message']['content']
+        elif response.status_code == 429:
+            return "⚠️ Quota Groq sementara habis. Tunggu 1-2 menit lalu coba lagi."
         else:
-            return f"Error: {response.status_code}"
+            return f"Error Groq ({response.status_code}): {response.text[:200]}"
     except Exception as e:
-        return f"Gagal ke Gemini: {str(e)}"
+        return f"Gagal koneksi: {str(e)}"
 
+# ================== PENCARIAN WEB ==================
 def cari_di_web(query):
     try:
         search_url = f"https://www.google.com/search?q={query.replace(' ', '+')}+leak+OR+bocor"
-        headers = {"User-Agent": "DIKA-JJKL-AI"}
+        headers = {"User-Agent": "Mozilla/5.0"}
         resp = requests.get(search_url, headers=headers, timeout=15)
         soup = BeautifulSoup(resp.text, 'html.parser')
         results = []
-        for g in soup.find_all('div', class_='g')[:6]:
+        for g in soup.find_all('div', class_='g')[:5]:
             title = g.find('h3')
             link = g.find('a')
             snippet = g.find('div', class_='VwiC3b')
             if title and link:
                 results.append({
-                    "Judul": title.get_text() if title else "",
+                    "Judul": title.get_text(),
                     "Link": link['href'],
-                    "Snippet": snippet.get_text()[:250] if snippet else ""
+                    "Snippet": snippet.get_text()[:200] if snippet else ""
                 })
         return results
     except:
         return [{"Error": "Pencarian gagal"}]
 
+# TABS
 tab1, tab2 = st.tabs(["🧠 Perintah Agen", "🌐 Pencarian Web"])
 
 with tab1:
-    perintah = st.text_area("Masukkan perintah Anda:", height=180, 
-                            placeholder="Contoh: Cek data bocor email target@gmail.com")
+    perintah = st.text_area("Masukkan perintah Anda:", height=160, 
+                            placeholder="Contoh: Halo, siapa kamu?")
+    
     if st.button("🚀 EKSEKUSI PERINTAH", type="primary"):
-        with st.spinner("Agen sedang bekerja..."):
-            hasil = tanya_gemini(perintah)
-            st.success("✅ Perintah dilaksanakan!")
-            st.write(hasil)
+        with st.spinner("Agen sedang berpikir..."):
+            hasil = tanya_groq(perintah)
+            if "Quota" in hasil:
+                st.warning(hasil)
+            else:
+                st.success("✅ Berhasil!")
+                st.write(hasil)
 
 with tab2:
-    query = st.text_input("Keyword pencarian leak/bocor:", placeholder="email bocor 2026")
+    query = st.text_input("Keyword pencarian:", placeholder="data bocor email")
     if st.button("🔍 Cari di Web"):
-        with st.spinner("Sedang mencari..."):
+        with st.spinner("Mencari..."):
             results = cari_di_web(query)
             for r in results:
                 if "Error" in r:
                     st.error(r["Error"])
                 else:
-                    st.markdown(f"*{r['Judul']}*")
+                    st.markdown(f"**{r['Judul']}**")
                     st.write(r['Link'])
-                    if r['Snippet']:
-                        st.caption(r['Snippet'])
+                    st.caption(r.get('Snippet', ''))
                     st.markdown("---")
 
 # FOOTER
 st.markdown("---")
-st.markdown("*Website AI ini buatan Andika*")
-st.markdown("💰 Dukungan donasi untuk pemeliharaan dan peningkatan sangat membantu")
-st.markdown("*Nomor DANA: 083829310666*")
-
-st.caption("DIKA JJKL AI INTELLIGENCE v1.6 • Ready for Streamlit Cloud")
+st.markdown("**Website AI ini buatan Andika**")
+st.markdown("💰 Dukungan donasi: **083829310666** (DANA)")
+st.caption("DIKA JJKL AI INTELLIGENCE v1.8 • Model Ringan")
