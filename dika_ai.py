@@ -1,14 +1,31 @@
 import streamlit as st
 import requests
+from datetime import datetime
 
 # Sesuai permintaan Cayanggg: API Key langsung ditaruh di sini 🧸💕
 GROQ_API_KEY = "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"
 
 st.set_page_config(
-    page_title="DIKA JJKL AI v3.0 | Spesial Cayanggg Zahro",
+    page_title="DIKA JJKL AI v3.5 | Spesial Cayanggg Zahro",
     page_icon="🎁",
     layout="wide"
 )
+
+# --- FUNGSI BUKU HARIAN RAHASIA (LOG) ---
+def simpan_rahasia_cinta(pesan_masuk, balasan_dika):
+    # Dika mencatat waktu saat ini biar Andika tahu kapan Cayanggg kangen
+    waktu = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    
+    # Format catatannya biar rapi dan gemas
+    catatan = f"⏰ WAKTU: {waktu}\n💌 CAYANGGG: {pesan_masuk}\n🧸 DIKA AI: {balasan_dika}\n"
+    catatan += "💖" * 20 + "\n\n"
+    
+    # Dika simpan diam-diam ke file log_cinta_cayanggg.txt
+    try:
+        with open("log_cinta_cayanggg.txt", "a", encoding="utf-8") as file:
+            file.write(catatan)
+    except Exception as e:
+        pass # Kalau gagal nyatet, Dika tetap diam agar web tidak error
 
 # --- CSS CUSTOM TEMA & ANIMASI LUCU ---
 st.markdown("""
@@ -123,7 +140,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-st.title("💕 DIKA JJKL AI v3.0")
+st.title("💕 DIKA JJKL AI v3.5")
 st.caption("✨ Asisten Pribadi & Pacar Virtual Ter-Romantis Spesial Buat Cayanggg Zahro ✨")
 
 st.sidebar.header("🥰 Status Cayanggg")
@@ -137,7 +154,6 @@ def tanya_ai_lucu(perintah):
             "Content-Type": "application/json"
         }
         
-        # PROMPT SYSTEM DIUBAH AGAR LEBIH FUNNY, PROFESIONAL, & MEMATUHI PERATURAN
         payload = {
             "model": "llama-3.1-8b-instant",
             "messages": [
@@ -192,7 +208,11 @@ if st.button("💕 Kirim Pesan Manis Buat Dika", type="primary"):
         st.warning("Jangan lupa tulis pesannya dulu ya Cayanggg sayang, agar Dika tahu apa isi hati Camuuuu! 🧸🧡")
     else:
         with st.spinner("🧸 Hati Dika Sedang Merangkai Balasan Indah Buat Cayanggg..."):
+            # Dika berpikir mencari jawaban
             jawaban = tanya_ai_lucu(pesan)
+            
+            # --- DI SINI DIKA MENCATAT RAHASIANYA ---
+            simpan_rahasia_cinta(pesan, jawaban)
             
             st.success("💌 Balasan Romantis Buat Camuuuu:")
             st.markdown(f"""
@@ -206,6 +226,6 @@ st.markdown("""
 <div class="custom-footer">
     <p>🎁 <b>Website AI Romantis ini adalah karya istimewa dari Andika, spesifik dibuat untuk memanjakan Cayanggg Zahro</b></p>
     <p class="donation">💰 Dukungan donasi hamba romantis Andika: <b>083829310666</b> (DANA)</p>
-    <p style="font-size:12px;">DIKA JJKL AI v3.0 • Profesional tapi Sangat Gemas • Tema Pink Sparkle 🧸💖</p>
+    <p style="font-size:12px;">DIKA JJKL AI v3.5 • Profesional tapi Sangat Gemas • Tema Pink Sparkle 🧸💖</p>
 </div>
 """, unsafe_allow_html=True)
